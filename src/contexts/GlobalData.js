@@ -209,7 +209,7 @@ async function getGlobalData(ethPrice, oldEthPrice) {
 
   try {
     // get timestamps for the days
-    const utcCurrentTime = dayjs.unix(1616025600)
+    const utcCurrentTime = dayjs.unix(1599583272)
     const utcOneDayBack = utcCurrentTime.subtract(1, 'day').unix()
     const utcTwoDaysBack = utcCurrentTime.subtract(2, 'day').unix()
     const utcOneWeekBack = utcCurrentTime.subtract(1, 'week').unix()
@@ -228,32 +228,32 @@ async function getGlobalData(ethPrice, oldEthPrice) {
       query: GLOBAL_DATA(),
       fetchPolicy: 'cache-first',
     })
-    data = result.data.uniswapFactories[0]
+    data = result.data.marsFactories[0]
 
     // fetch the historical data
     let oneDayResult = await client.query({
       query: GLOBAL_DATA(oneDayBlock?.number),
       fetchPolicy: 'cache-first',
     })
-    oneDayData = oneDayResult.data.uniswapFactories[0]
+    oneDayData = oneDayResult.data.marsFactories[0]
 
     let twoDayResult = await client.query({
       query: GLOBAL_DATA(twoDayBlock?.number),
       fetchPolicy: 'cache-first',
     })
-    twoDayData = twoDayResult.data.uniswapFactories[0]
+    twoDayData = twoDayResult.data.marsFactories[0]
 
     let oneWeekResult = await client.query({
       query: GLOBAL_DATA(oneWeekBlock?.number),
       fetchPolicy: 'cache-first',
     })
-    const oneWeekData = oneWeekResult.data.uniswapFactories[0]
+    const oneWeekData = oneWeekResult.data.marsFactories[0]
 
     let twoWeekResult = await client.query({
       query: GLOBAL_DATA(twoWeekBlock?.number),
       fetchPolicy: 'cache-first',
     })
-    const twoWeekData = twoWeekResult.data.uniswapFactories[0]
+    const twoWeekData = twoWeekResult.data.marsFactories[0]
 
     if (data && oneDayData && twoDayData && twoWeekData) {
       let [oneDayVolumeUSD, volumeChangeUSD] = get2DayPercentChange(
@@ -268,17 +268,18 @@ async function getGlobalData(ethPrice, oldEthPrice) {
         twoWeekData.totalVolumeUSD
       )
 
-      const [oneDayTxns, txnChange] = get2DayPercentChange(
-        data.txCount,
-        oneDayData.txCount ? oneDayData.txCount : 0,
-        twoDayData.txCount ? twoDayData.txCount : 0
-      )
+      const [oneDayTxns, txnChange] = (0, 0)
+      //  get2DayPercentChange(
+      //   data.txCount,
+      //   oneDayData.txCount ? oneDayData.txCount : 0,
+      //   twoDayData.txCount ? twoDayData.txCount : 0
+      // )
 
       // format the total liquidity in USD
-      data.totalLiquidityUSD = data.totalLiquidityETH * ethPrice
+      data.totalLiquidityUSD = data.totalLiquidityBNB * ethPrice
       const liquidityChangeUSD = getPercentChange(
-        data.totalLiquidityETH * ethPrice,
-        oneDayData.totalLiquidityETH * oldEthPrice
+        data.totalLiquidityBNB * ethPrice,
+        oneDayData.totalLiquidityBNB * oldEthPrice
       )
 
       // add relevant fields with the calculated amounts
@@ -320,8 +321,8 @@ const getChartData = async (oldestDateToFetch) => {
         fetchPolicy: 'cache-first',
       })
       skip += 1000
-      data = data.concat(result.data.uniswapDayDatas)
-      if (result.data.uniswapDayDatas.length < 1000) {
+      data = data.concat(result.data.marsDayDatas)
+      if (result.data.marsDayDatas.length < 1000) {
         allFound = true
       }
     }
@@ -428,7 +429,7 @@ const getGlobalTransactions = async () => {
  * Gets the current price  of ETH, 24 hour price, and % change between them
  */
 const getEthPrice = async () => {
-  const utcCurrentTime = dayjs.unix(1616025600)
+  const utcCurrentTime = dayjs.unix(1599583272)
   const utcOneDayBack = utcCurrentTime.subtract(1, 'day').startOf('minute').unix()
 
   let ethPrice = 0
@@ -445,8 +446,8 @@ const getEthPrice = async () => {
       query: ETH_PRICE(oneDayBlock),
       fetchPolicy: 'cache-first',
     })
-    const currentPrice = result?.data?.bundles[0]?.ethPrice
-    const oneDayBackPrice = resultOneDay?.data?.bundles[0]?.ethPrice
+    const currentPrice = result?.data?.bundles[0]?.bnbPrice
+    const oneDayBackPrice = resultOneDay?.data?.bundles[0]?.bnbPrice
     priceChangeETH = getPercentChange(currentPrice, oneDayBackPrice)
     ethPrice = currentPrice
     ethPriceOneDay = oneDayBackPrice
